@@ -1,0 +1,38 @@
+# Ignore environment variables 
+backend/.env
+
+*/.env
+.env
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Ignore __pycache__ directories in the backend folder
+__pycache__/
+
+venv
+.venv/
+
+backend/aksb-448207-44ea7e884b32.json
+
+# Runtime artifacts
+uploads/
+backend/uploads/
+*.db
+*.log
+debug-*.log
+.cursor/
+
+# Local run logs
+backend/backend_log.txt
+backend/backend_run.err
+backend/backend_run.log
+frontend/frontend_run.err
+frontend/frontend_run.log

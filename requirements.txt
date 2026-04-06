@@ -1,0 +1,17 @@
+flask
+flask-cors
+requests
+python-dotenv
+PyPDF2
+pydub
+textblob
+opencv-python
+flask_sqlalchemy
+sqlalchemy
+gunicorn==23.0.0
+google-generativeai
+psycopg2-binary
+flask-socketio
+eventlet
+bcrypt
+PyJWT
