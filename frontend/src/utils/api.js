@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://ai-cruiter-weld.vercel.app/api",
+  baseURL: import.meta.env.MODE === 'development' ? "http://127.0.0.1:5000/api" : "https://ai-cruiter-weld.vercel.app/api",
 });
 
 // Attach token automatically

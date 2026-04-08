@@ -333,9 +333,9 @@ Rules:
         "weaknesses": parsed.get("weaknesses") if isinstance(parsed.get("weaknesses"), list) else [],
         "suggestions": parsed.get("suggestions") if isinstance(parsed.get("suggestions"), list) else [],
         "ideal_points": parsed.get("ideal_points") if isinstance(parsed.get("ideal_points"), list) else [],
-        "overall_feedback": parsed.get("overall_feedback") or "",
-        "resume_alignment": parsed.get("resume_alignment") or "",
-        "referenced_resume_evidence": parsed.get("referenced_resume_evidence") or "",
+        "overall_feedback": "\n".join(parsed.get("overall_feedback")) if isinstance(parsed.get("overall_feedback"), list) else (parsed.get("overall_feedback") or ""),
+        "resume_alignment": "\n".join(parsed.get("resume_alignment")) if isinstance(parsed.get("resume_alignment"), list) else (parsed.get("resume_alignment") or ""),
+        "referenced_resume_evidence": "\n".join(parsed.get("referenced_resume_evidence")) if isinstance(parsed.get("referenced_resume_evidence"), list) else (parsed.get("referenced_resume_evidence") or ""),
     }
     feedback_data["markdown"] = feedback_to_markdown(feedback_data)
     return feedback_data
