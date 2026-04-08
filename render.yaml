@@ -13,10 +13,7 @@ services:
         sync: false
       - key: GROQ_API_KEY
         sync: false
-    disk:
-      name: uploads
-      mountPath: /opt/render/project/src/backend/uploads
-      sizeGB: 1
+
 
 databases:
   - name: alcruiter-db
