@@ -2,7 +2,7 @@ import requests
 import json
 
 # Setup
-URL = "http://localhost:5000/api"
+URL = "https://ai-cruiter-weld.vercel.app/api"
 TOKEN = "YOUR_TOKEN_HERE" # I'll need a real token or I'll skip auth for testing
 
 def test_submit():

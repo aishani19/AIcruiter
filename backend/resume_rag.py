@@ -5,44 +5,20 @@ from collections import Counter
 
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
-import google.generativeai as genai
+from groq import Groq
 
 load_dotenv()
 
-API_KEY = os.getenv("GEMINI_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-if not API_KEY:
-    raise ValueError("GEMINI_API_KEY not found in .env")
+if not GROQ_API_KEY:
+    raise ValueError("GROQ_API_KEY not found in .env")
 
-genai.configure(api_key=API_KEY)
-
-
-def _build_model():
-    preferred = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
-    candidates = [preferred, "gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash"]
-
-    for candidate in candidates:
-        try:
-            test_model = genai.GenerativeModel(candidate)
-            # Lightweight probe for invalid model IDs.
-            test_model.generate_content("ping")
-            return test_model
-        except Exception:
-            continue
-
-    # Last resort: pick any model that supports generateContent.
-    try:
-        for m in genai.list_models():
-            methods = getattr(m, "supported_generation_methods", []) or []
-            if "generateContent" in methods and getattr(m, "name", ""):
-                return genai.GenerativeModel(m.name.replace("models/", ""))
-    except Exception:
-        pass
-
-    raise RuntimeError("No Gemini model with generateContent support is available for this API key.")
+client = Groq(api_key=GROQ_API_KEY)
 
 
-model = _build_model()
+def _get_model():
+    return os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
 STOPWORDS = {
     "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "in",
@@ -153,9 +129,18 @@ def retrieve_relevant_chunks(resume_text, query, top_k=3):
     return top_chunks or chunks[:top_k]
 
 
-def _call_gemini(prompt):
-    response = model.generate_content(prompt)
-    return getattr(response, "text", "") or ""
+def _call_llm(prompt):
+    try:
+        completion = client.chat.completions.create(
+            model=_get_model(),
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=2048
+        )
+        return completion.choices[0].message.content or ""
+    except Exception as e:
+        print(f"❌ Groq API Error: {e}")
+        return ""
 
 
 def _fallback_questions(relevant_chunks, role, num_questions):
@@ -211,7 +196,7 @@ Rules:
 - Keep each question concise.
 """
 
-    parsed = _parse_json_response(_call_gemini(prompt), [])
+    parsed = _parse_json_response(_call_llm(prompt), [])
     if not isinstance(parsed, list) or not parsed:
         return _fallback_questions(relevant_chunks, role, num_questions)
 
@@ -323,7 +308,7 @@ Rules:
 - Be constructive and specific.
 """
 
-    parsed = _parse_json_response(_call_gemini(prompt), {})
+    parsed = _parse_json_response(_call_llm(prompt), {})
     if not isinstance(parsed, dict) or not parsed:
         parsed = _fallback_feedback(question, answer, relevant_chunks)
 
@@ -359,5 +344,5 @@ Rules:
 - Encourage the candidate to use a specific resume example.
 """
 
-    response = _call_gemini(prompt).strip()
+    response = _call_llm(prompt).strip()
     return response or "Use one specific resume example, explain your role, and end with the impact you created."
