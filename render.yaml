@@ -4,9 +4,13 @@ services:
     env: python
     plan: free
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "cd backend && gunicorn app:app -b 0.0.0.0:$PORT"
+    startCommand: "gunicorn --chdir backend app:app -b 0.0.0.0:$PORT"
     envVars:
-      - key: GEMINI_API_KEY
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: DATABASE_URL
         sync: false
       - key: GROQ_API_KEY
+        sync: false
+      - key: SECRET_KEY
         sync: false
