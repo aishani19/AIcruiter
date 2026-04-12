@@ -47,13 +47,14 @@ const Dashboard = () => {
     ? stats.bar_data 
     : [{ name: 'No Data', score: 0 }];
 
-  const displayPieData = stats.pie_data && stats.pie_data.length > 0
+  const hasPieData = stats.pie_data && stats.pie_data.some(d => d.value > 0);
+  const displayPieData = hasPieData
     ? stats.pie_data
     : [
         { name: 'Eye Contact', value: 25 },
-        { name: 'Confidence', value: 40 },
-        { name: 'Tone', value: 20 },
-        { name: 'Length', value: 15 },
+        { name: 'STAR Alignment', value: 25 },
+        { name: 'Confidence', value: 25 },
+        { name: 'Communication', value: 25 },
       ];
 
   const COLORS = ['#6366f1', '#a855f7', '#ec4899', '#8b5cf6'];

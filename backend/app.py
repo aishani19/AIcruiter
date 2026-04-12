@@ -747,17 +747,48 @@ def get_dashboard_stats(current_user):
                 s_avg = sum(sc[0] for sc in s_scores) / len(s_scores) if s_scores else 0
                 bar_data.append({"name": s.created_at.strftime("%b %d"), "score": round(s_avg, 1)})
             
-            # Pie Data
-            pie_data = [
-                {"name": "STAR Method", "value": 30},
-                {"name": "Eye Contact", "value": 25},
-                {"name": "Pacing", "value": 20},
-                {"name": "Accuracy", "value": 25}
-            ]
+            # 🥧 Calculate Dynamic Pie Data (Averages across all sessions)
+            # Fetch all metrics for the user
+            metrics_list = db_session.query(EvaluationMetrics).join(Response).join(Question).join(InterviewSession).filter(InterviewSession.user_id == current_user.user_id).all()
+            
+            if metrics_list:
+                avg_eye = sum((m.eye_contact or 0) for m in metrics_list) / len(metrics_list)
+                avg_relevance = sum((m.question_relevance_score or 70) for m in metrics_list) / len(metrics_list)
+                
+                # Pacing Score: Normalize WPM (Ideal range 110-150)
+                tot_pacing = 0
+                for m in metrics_list:
+                    wpm = m.wpm or 130
+                    if 110 <= wpm <= 150: score_p = 90
+                    elif wpm < 80 or wpm > 180: score_p = 50
+                    else: score_p = 75
+                    tot_pacing += score_p
+                avg_pacing = tot_pacing / len(metrics_list)
+                
+                # Communication: Derived from filler words and overall
+                avg_comm = sum((m.overall_score or 70) for m in metrics_list) / len(metrics_list)
+                
+                # Normalize values to sum to reasonable parts for a Pie Chart (or just use absolute averages)
+                pie_data = [
+                    {"name": "STAR Method", "value": round(avg_relevance, 1)},
+                    {"name": "Eye Contact", "value": round(avg_eye, 1) or 20}, # Minimum slice for visibility
+                    {"name": "Pacing", "value": round(avg_pacing, 1)},
+                    {"name": "Accuracy", "value": round(avg_comm, 1)}
+                ]
+            else:
+                pie_data = [
+                    {"name": "STAR Method", "value": 0},
+                    {"name": "Eye Contact", "value": 0},
+                    {"name": "Pacing", "value": 0},
+                    {"name": "Accuracy", "value": 0}
+                ]
             
             # AI Goals
             goals = ["Complete 3 more practice sessions to improve STAR alignment."]
-            if avg_score < 70: goals.append("Focus on providing more concrete examples in your answers.")
+            if avg_score > 0 and avg_score < 70: 
+                goals.append("Focus on providing more concrete examples in your answers.")
+            elif avg_score >= 70:
+                goals.append("Great job! Try a 'Mock Interview with Stress' mode to further hone your skills.")
             
             return jsonify({
                 "user_name": current_user.name,
@@ -765,7 +796,7 @@ def get_dashboard_stats(current_user):
                 "total_interviews": total_interviews,
                 "bar_data": bar_data,
                 "pie_data": pie_data,
-                "achievements": {"completed": total_interviews, "targets_met": len([s for s in all_scores if s[0] >= 80])},
+                "achievements": {"completed": total_interviews, "targets_met": len([s for s in all_scores if s[0] >= 85])},
                 "upcoming_goals": goals
             }), 200
         finally:
