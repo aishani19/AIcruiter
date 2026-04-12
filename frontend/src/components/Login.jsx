@@ -38,11 +38,9 @@ const Login = () => {
         setError('Unexpected response from server.');
       }
     } catch (err) {
-      console.error('Auth error:', err);
-      setError(
-        err.response?.data?.error || 
-        'Connection failed. Check if backend is running on port 5000.'
-      );
+      console.error("❌ ERROR:", err);
+      const rawError = err.response?.data?.error || err.response?.data || err.message || "Failed to generate questions.";
+      setError(typeof rawError === "string" ? rawError : (rawError.message || JSON.stringify(rawError)));
     } finally {
       setIsLoading(false);
     }

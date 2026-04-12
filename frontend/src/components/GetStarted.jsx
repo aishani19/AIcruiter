@@ -75,7 +75,8 @@ const GetStarted = () => {
 
     } catch (err) {
       console.error("❌ ERROR:", err);
-      setError(err.response?.data?.error || "Failed to generate questions. Please try again.");
+      const rawError = err.response?.data?.error || err.response?.data || err.message || "Failed to generate questions.";
+      setError(typeof rawError === "string" ? rawError : (rawError.message || JSON.stringify(rawError)));
     } finally {
       setIsLoading(false);
     }
