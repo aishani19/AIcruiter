@@ -36,3 +36,10 @@ backend/backend_run.err
 backend/backend_run.log
 frontend/frontend_run.err
 frontend/frontend_run.log
+
+# Secrets & credentials
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!vercel.json

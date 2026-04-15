@@ -1,8 +1,7 @@
 import logging
 import os
 import sys
-import json
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from sqlalchemy import create_engine, func
 import sqlalchemy
@@ -15,62 +14,10 @@ from dotenv import load_dotenv
 import bcrypt
 import jwt
 import re
-import traceback
 from datetime import datetime, timedelta
 from functools import wraps
-import urllib.request as urllib_request
 
-# #region agent log
-_DEBUG_LOG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "debug-195753.log"))
-_DEBUG_SESSION_ID = "195753"
-_DEBUG_ENDPOINT = "http://127.0.0.1:7845/ingest/68ad99ae-fd1b-400c-afc2-9b14a1a46ad7"
-def _agent_log(hypothesisId, location, message, data=None, runId="pre"):
-    """Write one NDJSON line for debug-mode analysis. Never log secrets/PII."""
-    try:
-        payload = {
-            "sessionId": _DEBUG_SESSION_ID,
-            "runId": runId,
-            "hypothesisId": hypothesisId,
-            "location": location,
-            "message": message,
-            "data": data or {},
-            "timestamp": int(time.time() * 1000),
-        }
-        # Best-effort: send to debug ingest endpoint (preferred), then also write locally.
-        try:
-            body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-            req = urllib_request.Request(
-                _DEBUG_ENDPOINT,
-                data=body,
-                headers={
-                    "Content-Type": "application/json",
-                    "X-Debug-Session-Id": _DEBUG_SESSION_ID,
-                },
-                method="POST",
-            )
-            urllib_request.urlopen(req, timeout=1).read()
-        except Exception:
-            pass
 
-        try:
-            with open(_DEBUG_LOG_PATH, "a", encoding="utf-8") as f:
-                f.write(json.dumps(payload, ensure_ascii=False) + "\n")
-        except Exception:
-            pass
-    except Exception:
-        # Never fail the request due to logging
-        pass
-# #endregion
-
-# #region agent log
-_agent_log(
-    "BOOT",
-    "backend/app.py:boot",
-    "app module loaded",
-    data={"cwd": os.getcwd(), "computed_log_path": _DEBUG_LOG_PATH},
-    runId="pre",
-)
-# #endregion
 
 # Fix Windows encoding issues
 if sys.platform == 'win32':
@@ -108,14 +55,19 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app, resources={"/*": {"origins": "*"}})
+CORS(app, resources={r"/api/*": {"origins": os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")}})
 
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'mysecretkey')
+import secrets as _secrets
+_secret_key = os.getenv('SECRET_KEY')
+if not _secret_key:
+    logger.warning("SECRET_KEY not set — generating a random ephemeral key. Set SECRET_KEY env var in production!")
+    _secret_key = _secrets.token_hex(32)
+app.config['SECRET_KEY'] = _secret_key
 
 UPLOAD_FOLDER = './uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://ai_user:Macbook@localhost/ai_interview_bot_db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./alcruiter.db")
 
 # DB Setup
 try:
@@ -134,33 +86,7 @@ import models
 models.Base.metadata.create_all(engine)
 logger.info("✓ Database schema verified")
 
-# #region agent log
-@app.before_request
-def _debug_request_logger():
-    """Create runtime evidence that API routes are being hit."""
-    try:
-        if request.path == "/api/submit-answer":
-            is_multipart = bool((request.content_type or "").startswith("multipart/"))
-            has_answer_file = False
-            if request.method == "POST" and is_multipart:
-                # Accessing request.files only for multipart payloads.
-                has_answer_file = "answer" in request.files
-            _agent_log(
-                "H0",
-                "backend/app.py:before_request",
-                "submit-answer request reached Flask before handler",
-                data={
-                    "path": request.path,
-                    "method": request.method,
-                    "is_json": bool(request.is_json),
-                    "content_type": request.content_type,
-                    "has_auth": bool(request.headers.get("Authorization")),
-                    "has_answer_file": has_answer_file,
-                },
-            )
-    except Exception:
-        pass
-# #endregion
+
 
 
 def ensure_runtime_schema():
@@ -207,55 +133,20 @@ def token_required(f):
         token = None
         if 'Authorization' in request.headers:
             token = request.headers['Authorization'].split(" ")[1]
-        # #region agent log
-        try:
-            _agent_log(
-                "H7",
-                "backend/app.py:token_required",
-                "token_required entered",
-                data={
-                    "path": request.path,
-                    "method": request.method,
-                    "has_auth_header": bool(request.headers.get("Authorization")),
-                    "has_token_value": bool(token),
-                },
-            )
-        except Exception:
-            pass
-        # #endregion
         
         if not token:
-            # #region agent log
-            _agent_log(
-                "H7",
-                "backend/app.py:token_required",
-                "token missing",
-                data={"path": request.path},
-            )
-            # #endregion
             return jsonify({'error': 'Token is missing!'}), 401
         
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
-            _agent_log(
-                "H7",
-                "backend/app.py:token_required",
-                "token decoded",
-                data={"decoded_user_id": data.get("user_id")},
-            )
             db_session = Session()
             current_user = db_session.query(User).filter_by(user_id=data['user_id']).first()
             db_session.close()
             if not current_user:
                 return jsonify({'error': 'User not found!'}), 401
         except Exception as e:
-            _agent_log(
-                "H7",
-                "backend/app.py:token_required",
-                "token decode failed",
-                data={"error": str(e)[:200]},
-            )
-            return jsonify({'error': 'Token is invalid!', 'message': str(e)}), 401
+            logger.warning(f"Token validation failed: {e}")
+            return jsonify({'error': 'Token is invalid!'}), 401
         
         return f(current_user, *args, **kwargs)
     
@@ -324,6 +215,28 @@ def generate_questions_api(current_user):
         if not file:
             return jsonify({"error": "No resume uploaded"}), 400
 
+        # Validate num_questions to prevent abuse (excessive API calls)
+        num_questions = max(1, min(num_questions, 20))
+
+        # Validate seniority level
+        VALID_SENIORITY = {"fresher", "junior", "mid", "senior", "lead"}
+        if seniority not in VALID_SENIORITY:
+            seniority = "fresher"
+
+        # Validate file type
+        ALLOWED_EXTENSIONS = {'.pdf'}
+        _, ext = os.path.splitext(file.filename or '')
+        if ext.lower() not in ALLOWED_EXTENSIONS:
+            return jsonify({"error": "Only PDF files are accepted"}), 400
+
+        # Validate file size (max 10 MB)
+        MAX_FILE_SIZE = 10 * 1024 * 1024
+        file.seek(0, os.SEEK_END)
+        file_size = file.tell()
+        file.seek(0)
+        if file_size > MAX_FILE_SIZE:
+            return jsonify({"error": "File size exceeds 10 MB limit"}), 400
+
         # Save resume path to user
         file_path = os.path.join(UPLOAD_FOLDER, f"user_{current_user.user_id}_resume.pdf") 
         file.save(file_path)
@@ -382,12 +295,14 @@ def generate_questions_api(current_user):
 
         except Exception as e:
             db_session.rollback()
-            return jsonify({"error": str(e)}), 500
+            logger.error(f"Question generation error: {e}", exc_info=True)
+            return jsonify({"error": "An internal error occurred while generating questions."}), 500
         finally:
             db_session.close()
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Question generation error (outer): {e}", exc_info=True)
+        return jsonify({"error": "An internal error occurred."}), 500
 
 
 # =========================
@@ -399,19 +314,6 @@ def submit_answer(current_user):
     try:
         db_session = Session()
         try:
-            # #region agent log
-            _agent_log(
-                "H1",
-                "backend/app.py:submit_answer:entry",
-                "submit-answer request received",
-                data={
-                    "is_json": bool(request.is_json),
-                    "content_type": request.content_type,
-                    "has_file": bool(request.files.get("answer")) if not request.is_json else False,
-                    "has_auth": bool(request.headers.get("Authorization")),
-                },
-            )
-            # #endregion
             # Detect JSON or Form Data
             if request.is_json:
                 data = request.json
@@ -434,23 +336,6 @@ def submit_answer(current_user):
             score = 70
             media_metrics = {}
 
-            # #region agent log
-            _agent_log(
-                "H2",
-                "backend/app.py:submit_answer:parsed",
-                "submit-answer parsed inputs",
-                data={
-                    "question_id": q_id,
-                    "question_text_len": len((question_text or "").strip()),
-                    "answer_format": answer_format,
-                    "text_answer_len": len((text_answer or "").strip()),
-                    "has_file": bool(answer_file),
-                    "file_mimetype": getattr(answer_file, "mimetype", None) if answer_file else None,
-                    "file_filename": getattr(answer_file, "filename", None) if answer_file else None,
-                },
-            )
-            # #endregion
-            
             # 🎥 Handle Video/Audio Blob
             if answer_file:
                 try:
@@ -458,14 +343,6 @@ def submit_answer(current_user):
                     file_path = os.path.join(UPLOAD_FOLDER, filename)
                     answer_file.save(file_path)
                     logger.info(f"✓ Saved {answer_format} file: {file_path}")
-                    # #region agent log
-                    _agent_log(
-                        "H1",
-                        "backend/app.py:submit_answer:file_saved",
-                        "media file saved",
-                        data={"answer_format": answer_format, "saved_path": file_path},
-                    )
-                    # #endregion
                     
                     if answer_format == 'video': 
                         video_path = file_path
@@ -476,18 +353,6 @@ def submit_answer(current_user):
                     try:
                         logger.info(f"Starting media processing for {answer_format}...")
                         result = process_user_video([question_text], file_path)
-                        # #region agent log
-                        _agent_log(
-                            "H1",
-                            "backend/app.py:submit_answer:media_result",
-                            "media processing returned",
-                            data={
-                                "keys": sorted(list(result.keys())) if isinstance(result, dict) else str(type(result)),
-                                "transcript_len": len((result.get("transcript") or "").strip()) if isinstance(result, dict) else None,
-                                "overall_score": result.get("overall_score") if isinstance(result, dict) else None,
-                            },
-                        )
-                        # #endregion
                         
                         transcript = result.get('transcript', text_answer)
                         # Sanitize transcript to avoid encoding issues
@@ -521,27 +386,11 @@ def submit_answer(current_user):
                         logger.info(f"✓ Media processing complete. Score: {score}, Transcript length: {len(transcript)}")
                     except Exception as media_err:
                         logger.error(f"Media processing failed: {media_err}", exc_info=True)
-                        # #region agent log
-                        _agent_log(
-                            "H1",
-                            "backend/app.py:submit_answer:media_exception",
-                            "media processing raised exception",
-                            data={"error": str(media_err), "answer_format": answer_format},
-                        )
-                        # #endregion
-                        ai_feedback = f"Media processing error: {str(media_err)}. Please try again."
+                        ai_feedback = "Media processing error. Please try again."
                         score = 60
                 except Exception as file_err:
                     logger.error(f"File handling error: {file_err}", exc_info=True)
-                    # #region agent log
-                    _agent_log(
-                        "H2",
-                        "backend/app.py:submit_answer:file_exception",
-                        "file save failed",
-                        data={"error": str(file_err), "answer_format": answer_format},
-                    )
-                    # #endregion
-                    ai_feedback = f"File upload error: {str(file_err)}"
+                    ai_feedback = "File upload error. Please try again."
                     score = 55
 
             # ✍️ Fallback to RAG text evaluation if no AI feedback yet or insufficient metrics
@@ -551,19 +400,6 @@ def submit_answer(current_user):
                     user = db_session.query(User).filter_by(user_id=current_user.user_id).first()
                     resume_text = extract_text_from_pdf(user.resume_path) if user and user.resume_path else ""
                     rag_feedback = generate_rag_feedback(question_text or "", transcript or "", resume_text=resume_text)
-                    # #region agent log
-                    _agent_log(
-                        "H3",
-                        "backend/app.py:submit_answer:rag_ok",
-                        "rag feedback generated",
-                        data={
-                            "has_resume_path": bool(getattr(user, "resume_path", None)),
-                            "resume_text_len": len(resume_text or ""),
-                            "rag_keys": sorted(list(rag_feedback.keys())) if isinstance(rag_feedback, dict) else str(type(rag_feedback)),
-                            "rag_score": rag_feedback.get("score") if isinstance(rag_feedback, dict) else None,
-                        },
-                    )
-                    # #endregion
                     
                     if ai_feedback:
                         ai_feedback = ai_feedback + "\n\n---\n\n" + rag_feedback.get("markdown", "")
@@ -575,33 +411,11 @@ def submit_answer(current_user):
                     logger.info(f"✓ RAG evaluation complete. Score: {score}")
                 except Exception as rag_err:
                     logger.error(f"RAG feedback generation failed: {rag_err}", exc_info=True)
-                    # #region agent log
-                    _agent_log(
-                        "H3",
-                        "backend/app.py:submit_answer:rag_exception",
-                        "rag feedback raised exception",
-                        data={"error": str(rag_err)},
-                    )
-                    # #endregion
                     if not ai_feedback:
                         ai_feedback = "Unable to generate detailed feedback. Please try again."
 
             # Ensure minimum feedback quality
             if not ai_feedback or ai_feedback.strip() == '':
-                # #region agent log
-                _agent_log(
-                    "H6",
-                    "backend/app.py:submit_answer:minimum_feedback",
-                    "using minimum feedback fallback",
-                    data={
-                        "score": score,
-                        "transcript_len": len((transcript or "").strip()),
-                        "question_text_len": len((question_text or "").strip()),
-                        "answer_format": answer_format,
-                        "has_media_metrics": bool(media_metrics),
-                    },
-                )
-                # #endregion
                 ai_feedback = "Your response was recorded. For better feedback, please ensure your audio/video is clear and your answer is detailed."
 
             # 💾 Verify if q_id exists for data integrity
@@ -654,15 +468,13 @@ def submit_answer(current_user):
 
         except Exception as e:
             db_session.rollback()
-            traceback.print_exc()
             logger.error(f"Submit error inner: {e}", exc_info=True)
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": "An internal error occurred while processing your answer."}), 500
         finally:
             db_session.close()
     except Exception as e:
-        traceback.print_exc()
         logger.error(f"Submit error outer: {e}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "An internal error occurred."}), 500
 
 
 # =========================
@@ -720,7 +532,8 @@ def realtime_feedback_api(current_user):
         finally:
             db_session.close()
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Realtime feedback error: {e}", exc_info=True)
+        return jsonify({"error": "An internal error occurred."}), 500
 
 
 # =========================
@@ -802,7 +615,8 @@ def get_dashboard_stats(current_user):
         finally:
             db_session.close()
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Dashboard stats error: {e}", exc_info=True)
+        return jsonify({"error": "An internal error occurred."}), 500
 
 
 # =========================
@@ -860,7 +674,8 @@ def get_session_detail_api(current_user, session_id):
         finally:
             db_session.close()
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Session detail error: {e}", exc_info=True)
+        return jsonify({"error": "An internal error occurred."}), 500
 
 
 # =========================
@@ -888,7 +703,8 @@ def get_leaderboard_api():
         finally:
             db_session.close()
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Leaderboard error: {e}", exc_info=True)
+        return jsonify({"error": "An internal error occurred."}), 500
 
 
 # =========================

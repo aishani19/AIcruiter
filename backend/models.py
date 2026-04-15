@@ -12,7 +12,7 @@ class User(Base):
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
-    password = Column(String(255), nullable=False, server_default='password')
+    password = Column(String(255), nullable=False)
     resume_path = Column(String(500), nullable=True)  # Path to the PDF file
     total_score = Column(Float, default=0.0)
     created_at = Column(DateTime, default=datetime.utcnow)
