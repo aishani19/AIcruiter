@@ -1,4 +1,4 @@
-<![CDATA[<div align="center">
+<div align="center">
 
 # 🚀 AIcruiter
 
@@ -63,21 +63,21 @@ AIcruiter is an intelligent interview preparation platform that combines resume-
 ## 2. 🏗 Architecture
 
 ```
-┌─────────────────────────────────────┐        ┌─────────────────────────────────────┐
-│          FRONTEND (Vercel)          │        │          BACKEND (Render)            │
-│                                     │        │                                     │
-│   React 18  ·  Vite  ·  Tailwind   │───────▶│   Flask  ·  Gunicorn  ·  SQLAlchemy │
-│                                     │  /api  │                                     │
-│   Pages:                            │        │   Core Modules:                     │
-│   ├── Landing / About               │        │   ├── app.py          (API routes)  │
-│   ├── Login / Signup                │        │   ├── resume_rag.py   (RAG engine)  │
-│   ├── Get Started (Resume Upload)   │        │   ├── groq_api.py     (LLM calls)   │
+┌─────────────────────────────────────┐        ┌──────────────────────────────────────┐
+│          FRONTEND (Vercel)          │        │           BACKEND (Render)            │
+│                                     │        │                                      │
+│   React 18  ·  Vite  ·  Tailwind   │───────▶│   Flask  ·  Gunicorn  ·  SQLAlchemy  │
+│                                     │  /api  │                                      │
+│   Pages:                            │        │   Core Modules:                      │
+│   ├── Landing / About               │        │   ├── app.py          (API routes)   │
+│   ├── Login / Signup                │        │   ├── resume_rag.py   (RAG engine)   │
+│   ├── Get Started (Resume Upload)   │        │   ├── groq_api.py     (LLM calls)    │
 │   ├── Practice (Text/Video/Audio)   │        │   ├── audio_transcription.py         │
-│   ├── Dashboard (Charts)            │        │   └── models.py      (DB schemas)   │
-│   ├── Leaderboard                   │        │                                     │
+│   ├── Dashboard (Charts)            │        │   └── models.py       (DB schemas)   │
+│   ├── Leaderboard                   │        │                                      │
 │   ├── History / Session Detail      │        │   Database:                          │
 │   └── Peer Match                    │        │   └── PostgreSQL / SQLite            │
-└─────────────────────────────────────┘        └─────────────────────────────────────┘
+└─────────────────────────────────────┘        └──────────────────────────────────────┘
 ```
 
 ---
@@ -197,7 +197,7 @@ AIcruiter/
 ### 5a. Docker Setup (Recommended)
 
 ```bash
-# Clone
+# Clone the repository
 git clone https://github.com/aishani19/AIcruiter.git
 cd AIcruiter
 
@@ -229,10 +229,10 @@ npm run dev
 <summary><strong>Backend</strong></summary>
 
 ```bash
-# Virtual environment
+# Create and activate virtual environment
 python -m venv venv
-venv\Scripts\activate          # Windows
-# source venv/bin/activate     # macOS / Linux
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # macOS / Linux
 
 # Install dependencies
 pip install -r requirements.txt
@@ -273,7 +273,7 @@ npm run dev
 | `POST` | `/api/signup` | Register new user |
 | `POST` | `/api/login` | Login → JWT token |
 
-### Interview Flow (🔒 Auth Required)
+### Interview Flow — 🔒 Auth Required
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -282,7 +282,7 @@ npm run dev
 | `POST` | `/api/get-hint` | Get resume-grounded hint |
 | `POST` | `/api/realtime-feedback` | Live AI coaching on draft answer |
 
-### Analytics (🔒 Auth Required)
+### Analytics — 🔒 Auth Required
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -308,7 +308,7 @@ users                    interview_sessions         questions
 │ name             │  └─▶│ user_id (FK)         │  └│ session_id (FK)  │
 │ email (unique)   │     │ desired_occupation   │   │ question_text    │
 │ password (hash)  │     │ seniority_level      │   │ difficulty       │
-│ resume_path      │     │ num_questions         │   │ order            │
+│ resume_path      │     │ num_questions        │   │ order            │
 │ total_score      │     │ created_at           │   └────────┬─────────┘
 │ created_at       │     └──────────────────────┘            │ 1:1
 └──────────────────┘                                         ▼
@@ -346,9 +346,9 @@ users                    interview_sessions         questions
 ## 8. 🐳 Docker
 
 ```bash
-docker compose up --build       # Start backend + PostgreSQL
-docker compose down             # Stop all services
-docker compose down -v          # Stop + wipe database
+docker compose up --build    # Start backend + PostgreSQL
+docker compose down          # Stop all services
+docker compose down -v       # Stop + wipe database
 ```
 
 | Container | Image | Port |
@@ -362,7 +362,7 @@ docker compose down -v          # Stop + wipe database
 
 | Service | Platform | Trigger | URL |
 |---------|----------|---------|-----|
-| Backend API | Render | Push to `main` | `alcruiter-api.onrender.com` |
+| Backend API | Render | Push to `main` | `aicruiter-api.onrender.com` |
 | Frontend | Vercel | Push to `main` | Your Vercel domain |
 
 > The frontend proxies `/api/*` requests to the Render backend via `vercel.json` rewrite rules — zero CORS issues in production.
@@ -394,9 +394,9 @@ docker compose down -v          # Stop + wipe database
 ## 11. 🤝 Contributing
 
 1. **Fork** the repository
-2. **Create** a feature branch → `git checkout -b feature/amazing-feature`
-3. **Commit** your changes → `git commit -m "Add amazing feature"`
-4. **Push** to the branch → `git push origin feature/amazing-feature`
+2. **Create** a feature branch — `git checkout -b feature/amazing-feature`
+3. **Commit** your changes — `git commit -m "Add amazing feature"`
+4. **Push** to the branch — `git push origin feature/amazing-feature`
 5. **Open** a Pull Request
 
 ---
@@ -414,4 +414,3 @@ This project is open source and available under the [MIT License](LICENSE).
 ⭐ **Star this repo if you found it useful!**
 
 </div>
-]]>
