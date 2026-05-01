@@ -1,20 +1,20 @@
-# Use the official Python image as the base image
-FROM python:3.8-slim
+# Alcruiter Backend
+FROM python:3.10-slim
 
-# Set the working directory
+# System deps for psycopg2-binary, opencv-headless, pydub/ffmpeg
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libpq-dev ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# Copy the requirements file into the container
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install the required Python packages
-RUN pip install -r requirements.txt
-
-# Copy the rest of the application code into the container
 COPY . .
 
-# Expose the port that your Flask app listens on
+RUN mkdir -p /app/uploads
+
 EXPOSE 5000
 
-# Start the Flask app
-CMD ["python3", "app.py"]
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120"]
