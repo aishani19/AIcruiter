@@ -4,342 +4,351 @@
 
 ### AI-Powered Interview Preparation Platform
 
-[![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Flask](https://img.shields.io/badge/Flask-2.x-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com)
-[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
-[![Render](https://img.shields.io/badge/Render-Deployed-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://render.com)
-[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
-
 **Practice smarter. Interview better. Land the job.**
+
+<br/>
+
+![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-2.x-000000?style=for-the-badge&logo=flask&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-LLaMA_3.3-F55036?style=for-the-badge&logo=groq&logoColor=white)
+![Render](https://img.shields.io/badge/Render-Deployed-46E3B7?style=for-the-badge&logo=render&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)
+
+<br/>
 
 AIcruiter is an intelligent interview preparation platform that combines resume-based question generation, real-time AI feedback, speech analysis, and gamified progress tracking to simulate a realistic interview experience.
 
-[Live Demo](#-deployment) · [Features](#-key-features) · [Tech Stack](#%EF%B8%8F-tech-stack) · [Getting Started](#-getting-started) · [API Reference](#-api-endpoints)
-
----
-
 </div>
 
-## ✨ Key Features
+---
 
-### 🎯 Resume-Grounded Question Generation
-Upload your resume and get **personalized interview questions** tailored to your experience, skills, and target role. Questions are generated using a custom **RAG (Retrieval-Augmented Generation)** pipeline — not generic templates.
+## 📑 Table of Contents
 
-### 🧠 Retrieval-Augmented Generation (RAG) Pipeline
-A custom-built RAG engine chunks your resume, scores relevance using TF-IDF + bigram matching, and feeds the most relevant excerpts to the LLM — ensuring every question and feedback is **grounded in your actual experience**.
-
-### 🎤 Multi-Modal Answer Submission
-Answer questions via **text, video, or audio**. Video/audio responses are transcribed using **Groq Whisper** and evaluated alongside text for a comprehensive analysis.
-
-### 📊 AI-Powered Feedback & Scoring
-Each answer is evaluated by an AI panel that provides:
-- **Structured markdown feedback** with strengths, weaknesses, and suggestions
-- **Resume alignment scoring** — how well your answer maps to your resume
-- **STAR method analysis** — evaluates Situation, Task, Action, Result structure
-- **Ideal points to cover** — what a perfect answer would include
-
-### 💡 Real-Time AI Coaching
-Get **instant live feedback** while drafting your answer — before final submission. Plus, request **AI-generated hints** grounded in your resume to guide your response.
-
-### 📈 Performance Dashboard
-Track your progress with interactive visualizations:
-- **Circular progress** — overall interview readiness score
-- **Bar charts** — historical session scores over time
-- **Pie charts** — breakdown of eye contact, pacing, STAR alignment, and accuracy
-- **AI-recommended goals** — personalized next steps
-
-### 🏆 Leaderboard & Gamification
-Compete with other users on a global leaderboard ranked by interview performance. Earn skill badges like **"Elite"** and **"Practitioner"**.
-
-### 📜 Interview History & Session Replay
-Review every past interview session with full question-answer-feedback detail. Deep-dive into individual sessions to track improvement.
-
-### 🤝 Peer Match
-Connect with other users for collaborative practice sessions.
+1. [Key Features](#1--key-features)
+2. [Architecture](#2--architecture)
+3. [Tech Stack](#3-%EF%B8%8F-tech-stack)
+4. [Project Structure](#4--project-structure)
+5. [Getting Started](#5--getting-started)
+6. [API Reference](#6--api-reference)
+7. [Database Schema](#7-%EF%B8%8F-database-schema)
+8. [Docker](#8--docker)
+9. [Deployment](#9--deployment)
+10. [Environment Variables](#10--environment-variables)
+11. [Contributing](#11--contributing)
+12. [License](#12--license)
 
 ---
 
-## 🏗️ Architecture
+## 1. ✨ Key Features
+
+| # | Feature | Description |
+|---|---------|-------------|
+| 1 | **🎯 Resume-Grounded Questions** | Upload your resume → get personalized interview questions tailored to your experience, skills, and target role using a custom RAG pipeline |
+| 2 | **🧠 RAG Pipeline** | Custom-built engine that chunks your resume, scores relevance via TF-IDF + bigram matching, and feeds top excerpts to the LLM |
+| 3 | **🎤 Multi-Modal Answers** | Answer via **text**, **video**, or **audio** — video/audio is transcribed using Groq Whisper for comprehensive evaluation |
+| 4 | **📊 AI Feedback & Scoring** | Structured markdown feedback with strengths, weaknesses, STAR method analysis, resume alignment, and ideal answer points |
+| 5 | **💡 Real-Time AI Coaching** | Get instant live feedback while drafting + resume-grounded hints before final submission |
+| 6 | **📈 Performance Dashboard** | Interactive charts (bar, pie, circular progress) tracking scores, eye contact, pacing, and AI-recommended goals |
+| 7 | **🏆 Leaderboard** | Global rankings by interview performance with skill badges ("Elite", "Practitioner") |
+| 8 | **📜 Interview History** | Review every past session with full question → answer → feedback → score detail |
+| 9 | **🤝 Peer Match** | Connect with other users for collaborative practice sessions |
+
+---
+
+## 2. 🏗 Architecture
 
 ```
-┌──────────────────────────────────┐       ┌──────────────────────────────────┐
-│         FRONTEND (Vercel)        │       │        BACKEND (Render)          │
-│                                  │       │                                  │
-│  React 18 + Vite + Tailwind CSS  │──────▶│  Flask + Gunicorn               │
-│                                  │ /api  │                                  │
-│  • About / Landing Page          │       │  • Auth (JWT + bcrypt)           │
-│  • Login / Signup                │       │  • Resume PDF Parsing (PyPDF2)   │
-│  • Get Started (Upload Resume)   │       │  • RAG Pipeline (resume_rag.py)  │
-│  • Practice (Text/Video/Audio)   │       │  • Question Generation (Groq)    │
-│  • AI Feedback Panel             │       │  • Audio Transcription (Whisper) │
-│  • Dashboard (Recharts)          │       │  • Feedback Generation (Groq)    │
-│  • Leaderboard                   │       │  • Speech/Video Analysis         │
-│  • Interview History             │       │                                  │
-│  • Peer Match                    │       │  PostgreSQL / SQLite             │
-└──────────────────────────────────┘       └──────────────────────────────────┘
+┌─────────────────────────────────────┐        ┌─────────────────────────────────────┐
+│          FRONTEND (Vercel)          │        │          BACKEND (Render)            │
+│                                     │        │                                     │
+│   React 18  ·  Vite  ·  Tailwind   │───────▶│   Flask  ·  Gunicorn  ·  SQLAlchemy │
+│                                     │  /api  │                                     │
+│   Pages:                            │        │   Core Modules:                     │
+│   ├── Landing / About               │        │   ├── app.py          (API routes)  │
+│   ├── Login / Signup                │        │   ├── resume_rag.py   (RAG engine)  │
+│   ├── Get Started (Resume Upload)   │        │   ├── groq_api.py     (LLM calls)   │
+│   ├── Practice (Text/Video/Audio)   │        │   ├── audio_transcription.py         │
+│   ├── Dashboard (Charts)            │        │   └── models.py      (DB schemas)   │
+│   ├── Leaderboard                   │        │                                     │
+│   ├── History / Session Detail      │        │   Database:                          │
+│   └── Peer Match                    │        │   └── PostgreSQL / SQLite            │
+└─────────────────────────────────────┘        └─────────────────────────────────────┘
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## 3. 🛠️ Tech Stack
 
 ### Frontend
-| Technology | Purpose |
-|-----------|---------|
-| **React 18** | Component-based UI with lazy loading & error boundaries |
-| **Vite 6** | Lightning-fast dev server and build tool |
-| **Tailwind CSS 3.4** | Utility-first styling with custom dark theme |
-| **React Router v7** | Client-side routing with SPA support |
-| **Recharts** | Interactive bar charts, pie charts for dashboard |
-| **react-circular-progressbar** | Animated score visualization |
-| **react-media-recorder** | In-browser video/audio recording |
-| **react-markdown** | Rendering AI feedback as formatted markdown |
-| **Axios** | HTTP client with interceptors for auth |
+
+| Technology | Version | Purpose |
+|-----------|---------|---------|
+| React | 18 | Component-based UI with lazy loading & error boundaries |
+| Vite | 6 | Dev server and production build tool |
+| Tailwind CSS | 3.4 | Utility-first styling with dark theme |
+| React Router | 7 | Client-side SPA routing |
+| Recharts | 2.15 | Bar charts, pie charts for dashboard |
+| react-circular-progressbar | 2.1 | Animated score visualization |
+| react-media-recorder | 1.7 | In-browser video/audio recording |
+| react-markdown | 10.1 | Rendering AI feedback as formatted markdown |
+| Axios | 1.7 | HTTP client with JWT interceptors |
 
 ### Backend
-| Technology | Purpose |
-|-----------|---------|
-| **Flask** | Lightweight Python web framework |
-| **Gunicorn** | Production WSGI server |
-| **SQLAlchemy** | ORM for database models and queries |
-| **PostgreSQL** | Production database (SQLite fallback) |
-| **PyPDF2** | Resume PDF text extraction |
-| **bcrypt** | Secure password hashing |
-| **PyJWT** | JSON Web Token authentication |
-| **Flask-CORS** | Cross-origin resource sharing |
+
+| Technology | Version | Purpose |
+|-----------|---------|---------|
+| Flask | 2.x | Python web framework |
+| Gunicorn | 23.0 | Production WSGI server |
+| SQLAlchemy | — | ORM for database models and queries |
+| PostgreSQL | 16 | Production database (SQLite fallback) |
+| PyPDF2 | — | Resume PDF text extraction |
+| bcrypt | — | Secure password hashing |
+| PyJWT | — | JSON Web Token authentication |
+| Flask-CORS | — | Cross-origin resource sharing |
+| Flask-SocketIO | — | Real-time WebSocket support |
 
 ### AI / ML
-| Technology | Purpose |
-|-----------|---------|
-| **Groq API** (LLaMA 3.3 70B) | Question generation, feedback, hints, evaluation |
-| **Groq Whisper** (whisper-large-v3) | Audio/video transcription |
-| **Custom RAG Pipeline** | Resume chunking, TF-IDF scoring, context retrieval |
-| **OpenCV** | Video frame analysis (eye contact detection) |
-| **pydub + FFmpeg** | Audio extraction from video recordings |
 
-### DevOps & Deployment
+| Technology | Model | Purpose |
+|-----------|-------|---------|
+| Groq API | LLaMA 3.3 70B | Question generation, feedback, hints, evaluation |
+| Groq Whisper | whisper-large-v3 | Audio/video speech-to-text transcription |
+| Custom RAG | — | Resume chunking → TF-IDF scoring → context retrieval |
+| OpenCV | — | Video frame analysis (eye contact detection) |
+| pydub + FFmpeg | — | Audio extraction from video recordings |
+
+### DevOps
+
 | Technology | Purpose |
 |-----------|---------|
-| **Docker** | Containerized local development environment |
-| **Docker Compose** | Multi-service orchestration (backend + PostgreSQL) |
-| **Render** | Backend API hosting (CI/CD from GitHub) |
-| **Vercel** | Frontend static hosting (CI/CD from GitHub) |
+| Docker + Docker Compose | Containerized local dev (backend + PostgreSQL) |
+| Render | Backend API hosting with CI/CD |
+| Vercel | Frontend static hosting with CI/CD |
+| GitHub | Source control + auto-deploy triggers |
 
 ---
 
-## 📁 Project Structure
+## 4. 📁 Project Structure
 
 ```
 AIcruiter/
-├── backend/
-│   ├── app.py                 # Main Flask application (all API routes)
-│   ├── models.py              # SQLAlchemy models (User, Session, Question, Response, Metrics)
-│   ├── resume_rag.py          # Custom RAG pipeline (chunking, scoring, retrieval)
-│   ├── groq_api.py            # Groq LLM integration (questions, feedback, hints)
-│   ├── audio_transcription.py # Whisper transcription + video processing
-│   ├── config.py              # App configuration
-│   ├── init_db.py             # Database initialization script
-│   ├── Dockerfile             # Backend Docker image
-│   └── .env                   # Environment variables (not committed)
 │
-├── frontend/
-│   ├── src/
-│   │   ├── App.jsx            # Route definitions with lazy loading
-│   │   ├── components/
-│   │   │   ├── AboutPage.jsx  # Landing page
-│   │   │   ├── Login.jsx      # Auth (login/signup) with JWT
-│   │   │   ├── GetStarted.jsx # Resume upload + question generation
-│   │   │   ├── Practice.jsx   # Interview session (text/video/audio)
-│   │   │   ├── Feedback.jsx   # AI evaluation results
-│   │   │   ├── Dashboard.jsx  # Performance analytics
-│   │   │   ├── Leaderboard.jsx# Global rankings
-│   │   │   ├── History.jsx    # Past interview sessions
-│   │   │   ├── SessionDetail.jsx # Individual session deep-dive
-│   │   │   ├── PeerMatch.jsx  # Peer practice matching
-│   │   │   └── Navbar.jsx     # Navigation bar
-│   │   └── utils/
-│   │       └── api.js         # Axios instance with auth interceptors
-│   ├── vercel.json            # Vercel rewrite rules (API proxy)
-│   ├── vite.config.js         # Vite config with dev proxy
-│   └── package.json
+├── 📂 backend/
+│   ├── app.py                  # Flask app — all API routes
+│   ├── models.py               # SQLAlchemy models (5 tables)
+│   ├── resume_rag.py           # Custom RAG pipeline
+│   ├── groq_api.py             # Groq LLM integration
+│   ├── audio_transcription.py  # Whisper transcription + video processing
+│   ├── config.py               # App configuration
+│   ├── init_db.py              # Database initialization
+│   ├── Dockerfile              # Backend container image
+│   └── .env                    # Secrets (not committed)
 │
-├── Dockerfile                 # Root Docker image for docker-compose
-├── docker-compose.yml         # Multi-service local dev (backend + PostgreSQL)
-├── .dockerignore              # Docker build exclusions
-├── render.yaml                # Render deployment configuration
-├── requirements.txt           # Python dependencies
+├── 📂 frontend/
+│   ├── 📂 src/
+│   │   ├── App.jsx             # Route definitions + lazy loading
+│   │   ├── 📂 components/
+│   │   │   ├── AboutPage.jsx   # Landing page
+│   │   │   ├── Login.jsx       # Auth (login / signup)
+│   │   │   ├── GetStarted.jsx  # Resume upload → question generation
+│   │   │   ├── Practice.jsx    # Interview session (text/video/audio)
+│   │   │   ├── Feedback.jsx    # AI evaluation results
+│   │   │   ├── Dashboard.jsx   # Performance analytics + charts
+│   │   │   ├── Leaderboard.jsx # Global rankings
+│   │   │   ├── History.jsx     # Past interview sessions
+│   │   │   ├── SessionDetail.jsx # Session deep-dive
+│   │   │   ├── PeerMatch.jsx   # Peer practice matching
+│   │   │   └── Navbar.jsx      # Navigation bar
+│   │   └── 📂 utils/
+│   │       └── api.js          # Axios instance + auth interceptors
+│   ├── vercel.json             # API proxy rewrite rules
+│   ├── vite.config.js          # Dev server proxy config
+│   └── package.json            # Frontend dependencies
+│
+├── Dockerfile                  # Root image for docker-compose
+├── docker-compose.yml          # Backend + PostgreSQL orchestration
+├── .dockerignore               # Build context exclusions
+├── render.yaml                 # Render deployment config
+├── requirements.txt            # Python dependencies
 └── README.md
 ```
 
 ---
 
-## 🚀 Getting Started
+## 5. 🚀 Getting Started
 
 ### Prerequisites
 
-- **Node.js** ≥ 18
-- **Python** ≥ 3.10
-- **PostgreSQL** (or use SQLite for quick testing)
-- **Docker** (optional, for containerized setup)
-- **Groq API Key** — [Get one free](https://console.groq.com)
+| Requirement | Version |
+|------------|---------|
+| Node.js | ≥ 18 |
+| Python | ≥ 3.10 |
+| PostgreSQL | Any (or use SQLite) |
+| Docker | Optional |
+| Groq API Key | [Get free key →](https://console.groq.com) |
 
 ---
 
-### Option 1: Docker Setup (Recommended)
-
-The fastest way to get the full stack running:
+### 5a. Docker Setup (Recommended)
 
 ```bash
-# 1. Clone the repository
+# Clone
 git clone https://github.com/aishani19/AIcruiter.git
 cd AIcruiter
 
-# 2. Create a .env file at the project root
-echo "GROQ_API_KEY=your_groq_api_key_here" > .env
-echo "GEMINI_API_KEY=your_gemini_key_here" >> .env
-echo "SECRET_KEY=your_secret_key_here" >> .env
+# Create root .env
+echo GROQ_API_KEY=your_key_here > .env
+echo GEMINI_API_KEY=your_key_here >> .env
+echo SECRET_KEY=your_secret_here >> .env
 
-# 3. Build and start all services
+# Start backend + database
 docker compose up --build
-```
 
-This starts:
-- **Backend** → `http://localhost:5000`
-- **PostgreSQL** → `localhost:5432`
-
-Then run the frontend separately:
-```bash
+# In a separate terminal — start frontend
 cd frontend
 npm install
 npm run dev
-# Frontend → http://localhost:5173
 ```
+
+| Service | URL |
+|---------|-----|
+| Backend | `http://localhost:5000` |
+| Frontend | `http://localhost:5173` |
+| PostgreSQL | `localhost:5432` |
 
 ---
 
-### Option 2: Manual Setup
+### 5b. Manual Setup
 
-#### Backend
+<details>
+<summary><strong>Backend</strong></summary>
 
 ```bash
-# 1. Create and activate a virtual environment
+# Virtual environment
 python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # macOS/Linux
+venv\Scripts\activate          # Windows
+# source venv/bin/activate     # macOS / Linux
 
-# 2. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# 3. Configure environment variables
-# Create backend/.env with:
+# Configure backend/.env
 DATABASE_URL=postgresql://user:password@localhost:5432/ai_interview_bot_db
 GROQ_API_KEY=your_groq_api_key
-SECRET_KEY=your_secret_key
+SECRET_KEY=your_jwt_secret
 
-# 4. Start the backend
+# Run
 cd backend
 python app.py
-# Backend → http://localhost:5000
+# → http://localhost:5000
 ```
 
-#### Frontend
+</details>
+
+<details>
+<summary><strong>Frontend</strong></summary>
 
 ```bash
-# 1. Install dependencies
 cd frontend
 npm install
-
-# 2. Start the dev server
 npm run dev
-# Frontend → http://localhost:5173
+# → http://localhost:5173
 ```
+
+</details>
 
 ---
 
-## 📡 API Endpoints
+## 6. 📡 API Reference
 
 ### Authentication
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/signup` | Register a new user |
-| `POST` | `/api/login` | Login and receive JWT token |
+| `POST` | `/api/signup` | Register new user |
+| `POST` | `/api/login` | Login → JWT token |
 
-### Interview Flow
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `POST` | `/api/generate-questions` | Upload resume → get AI questions | 🔒 |
-| `POST` | `/api/submit-answer` | Submit answer (text/video/audio) → get feedback | 🔒 |
-| `POST` | `/api/get-hint` | Get a resume-grounded hint for a question | 🔒 |
-| `POST` | `/api/realtime-feedback` | Get live AI coaching on draft answer | 🔒 |
+### Interview Flow (🔒 Auth Required)
 
-### Dashboard & Analytics
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `GET` | `/api/dashboard-stats` | Performance metrics, charts, goals | 🔒 |
-| `GET` | `/api/history` | List all past interview sessions | 🔒 |
-| `GET` | `/api/history/:sessionId` | Detailed session with Q&A + scores | 🔒 |
-| `GET` | `/api/leaderboard` | Global user rankings | — |
-
-### Health
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/test` | API health check |
-| `GET` | `/` | Backend status |
+| `POST` | `/api/generate-questions` | Upload resume → AI-generated questions |
+| `POST` | `/api/submit-answer` | Submit text/video/audio → AI feedback |
+| `POST` | `/api/get-hint` | Get resume-grounded hint |
+| `POST` | `/api/realtime-feedback` | Live AI coaching on draft answer |
+
+### Analytics (🔒 Auth Required)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/dashboard-stats` | Performance metrics + charts |
+| `GET` | `/api/history` | All past interview sessions |
+| `GET` | `/api/history/:sessionId` | Session detail (Q&A + scores) |
+
+### Public
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/leaderboard` | Global user rankings |
+| `GET` | `/api/test` | Health check |
 
 ---
 
-## 🗄️ Database Schema
+## 7. 🗄️ Database Schema
 
 ```
-┌──────────┐     ┌────────────────────┐     ┌─────────────┐
-│  users   │────▶│ interview_sessions │────▶│  questions   │
-│          │ 1:N │                    │ 1:N │              │
-│ user_id  │     │ session_id         │     │ question_id  │
-│ name     │     │ user_id (FK)       │     │ session_id   │
-│ email    │     │ desired_occupation │     │ question_text│
-│ password │     │ seniority_level    │     │ difficulty   │
-│ resume   │     │ num_questions      │     │ order        │
-└──────────┘     └────────────────────┘     └──────┬──────┘
-                                                    │ 1:1
-                                              ┌─────▼──────┐
-                                              │  responses  │
-                                              │             │
-                                              │ response_id │
-                                              │ answer_type │
-                                              │ transcript  │
-                                              │ feedback    │
-                                              │ text_answer │
-                                              └──────┬──────┘
-                                                     │ 1:1
-                                            ┌────────▼────────┐
-                                            │evaluation_metrics│
-                                            │                  │
-                                            │ wpm              │
-                                            │ eye_contact      │
-                                            │ filler_words     │
-                                            │ overall_score    │
-                                            │ duration         │
-                                            └──────────────────┘
+users                    interview_sessions         questions
+┌──────────────────┐     ┌──────────────────────┐   ┌──────────────────┐
+│ user_id (PK)     │──┐  │ session_id (PK)      │──┐│ question_id (PK) │
+│ name             │  └─▶│ user_id (FK)         │  └│ session_id (FK)  │
+│ email (unique)   │     │ desired_occupation   │   │ question_text    │
+│ password (hash)  │     │ seniority_level      │   │ difficulty       │
+│ resume_path      │     │ num_questions         │   │ order            │
+│ total_score      │     │ created_at           │   └────────┬─────────┘
+│ created_at       │     └──────────────────────┘            │ 1:1
+└──────────────────┘                                         ▼
+                                                   responses
+                                                   ┌──────────────────┐
+                                                   │ response_id (PK) │
+                                                   │ question_id (FK) │
+                                                   │ answer_type      │
+                                                   │ text_answer      │
+                                                   │ transcript       │
+                                                   │ feedback         │
+                                                   │ video_path       │
+                                                   │ audio_path       │
+                                                   │ created_at       │
+                                                   └────────┬─────────┘
+                                                            │ 1:1
+                                                            ▼
+                                                   evaluation_metrics
+                                                   ┌──────────────────┐
+                                                   │ metric_id (PK)   │
+                                                   │ response_id (FK) │
+                                                   │ wpm              │
+                                                   │ eye_contact      │
+                                                   │ filler_words     │
+                                                   │ avg_sentence_len │
+                                                   │ duration         │
+                                                   │ overall_score    │
+                                                   └──────────────────┘
 ```
+
+**Relationships:** `User` → 1:N → `InterviewSession` → 1:N → `Question` → 1:1 → `Response` → 1:1 → `EvaluationMetrics`
 
 ---
 
-## 🐳 Docker
-
-The project is fully containerized for consistent development environments:
+## 8. 🐳 Docker
 
 ```bash
-# Start backend + PostgreSQL
-docker compose up --build
-
-# Stop all services
-docker compose down
-
-# Reset database
-docker compose down -v
+docker compose up --build       # Start backend + PostgreSQL
+docker compose down             # Stop all services
+docker compose down -v          # Stop + wipe database
 ```
 
 | Container | Image | Port |
@@ -349,50 +358,50 @@ docker compose down -v
 
 ---
 
-## 🌐 Deployment
+## 9. 🌐 Deployment
 
-| Service | Platform | Auto-Deploy |
-|---------|----------|-------------|
-| **Backend API** | [Render](https://render.com) | ✅ On push to `main` |
-| **Frontend** | [Vercel](https://vercel.com) | ✅ On push to `main` |
+| Service | Platform | Trigger | URL |
+|---------|----------|---------|-----|
+| Backend API | Render | Push to `main` | `alcruiter-api.onrender.com` |
+| Frontend | Vercel | Push to `main` | Your Vercel domain |
 
-The frontend proxies all `/api/*` requests to the Render backend via `vercel.json` rewrite rules. No CORS issues in production.
+> The frontend proxies `/api/*` requests to the Render backend via `vercel.json` rewrite rules — zero CORS issues in production.
 
 ---
 
-## 🔐 Environment Variables
+## 10. 🔐 Environment Variables
 
-### Backend (`backend/.env`)
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/ai_interview_bot_db
-GROQ_API_KEY=your_groq_api_key
-SECRET_KEY=your_jwt_secret_key
-```
+### `backend/.env`
 
-### Root (`.env` — for Docker Compose)
-```env
-GROQ_API_KEY=your_groq_api_key
-GEMINI_API_KEY=your_gemini_api_key
-SECRET_KEY=your_jwt_secret_key
-```
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | ✅ | PostgreSQL connection string |
+| `GROQ_API_KEY` | ✅ | Groq API key for LLM + Whisper |
+| `SECRET_KEY` | ✅ | JWT signing secret |
+
+### Root `.env` (Docker Compose)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GROQ_API_KEY` | ✅ | Passed to backend container |
+| `GEMINI_API_KEY` | ❌ | Optional Gemini integration |
+| `SECRET_KEY` | ✅ | JWT signing secret |
 
 > ⚠️ **Never commit `.env` files.** They are excluded via `.gitignore`.
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Here's how:
+## 11. 🤝 Contributing
 
 1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
+2. **Create** a feature branch → `git checkout -b feature/amazing-feature`
+3. **Commit** your changes → `git commit -m "Add amazing feature"`
+4. **Push** to the branch → `git push origin feature/amazing-feature`
 5. **Open** a Pull Request
 
 ---
 
-## 📄 License
+## 12. 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).
 
@@ -402,7 +411,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 **Built with ❤️ by [Aishani](https://github.com/aishani19)**
 
-⭐ Star this repo if you found it useful!
+⭐ **Star this repo if you found it useful!**
 
 </div>
 ]]>
