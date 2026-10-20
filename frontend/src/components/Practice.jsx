@@ -8,11 +8,48 @@ import api from '../utils/api';
 const PracticeQuestion = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { questions, sessionId } = location.state || {};
+  const navState = location.state || {};
+
+  const getQuestionText = (q) => {
+    if (!q) return "";
+    if (typeof q === "string") return q;
+    return q.text || q.question || q.q || "";
+  };
+
+  const getQuestionId = (q, index) => {
+    if (!q) return index + 1;
+    return q.id ?? (index + 1);
+  };
+
+  // Try navigation state first, fallback to sessionStorage to survive page refreshes
+  const [questions, setQuestions] = useState(() => {
+    if (navState.questions && Array.isArray(navState.questions) && navState.questions.length > 0) {
+      try {
+        sessionStorage.setItem("active_interview_questions", JSON.stringify(navState.questions));
+        if (navState.sessionId) sessionStorage.setItem("active_session_id", String(navState.sessionId));
+      } catch (e) {}
+      return navState.questions;
+    }
+    try {
+      const saved = sessionStorage.getItem("active_interview_questions");
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [];
+  });
+
+  const [sessionId, setSessionId] = useState(() => {
+    return navState.sessionId || sessionStorage.getItem("active_session_id") || null;
+  });
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState(questions?.[0]?.text || "");
-  const [currentQuestionId, setCurrentQuestionId] = useState(questions?.[0]?.id || "");
+  const [currentQuestion, setCurrentQuestion] = useState(() => {
+    const initialList = (navState.questions && navState.questions.length > 0) ? navState.questions : [];
+    return getQuestionText(initialList[0]);
+  });
+  const [currentQuestionId, setCurrentQuestionId] = useState(() => {
+    const initialList = (navState.questions && navState.questions.length > 0) ? navState.questions : [];
+    return getQuestionId(initialList[0], 0);
+  });
 
   const [answerFormat, setAnswerFormat] = useState('text'); // 'text', 'video', 'audio'
   const [textAnswer, setTextAnswer] = useState('');
@@ -39,11 +76,26 @@ const PracticeQuestion = () => {
     if (!token) navigate('/login');
   }, [navigate]);
 
+  // Handle incoming navigation with new questions (reset to start of fresh session)
   useEffect(() => {
-    if (questions && currentQuestionIndex < questions.length) {
+    if (navState.questions && Array.isArray(navState.questions) && navState.questions.length > 0) {
+      setQuestions(navState.questions);
+      setSessionId(navState.sessionId || null);
+      setCurrentQuestionIndex(0);
+      try {
+        sessionStorage.setItem("active_interview_questions", JSON.stringify(navState.questions));
+        if (navState.sessionId) sessionStorage.setItem("active_session_id", String(navState.sessionId));
+      } catch (e) {}
+    }
+  }, [navState.questions, navState.sessionId]);
+
+  useEffect(() => {
+    if (questions && questions.length > 0 && currentQuestionIndex < questions.length) {
       const q = questions[currentQuestionIndex];
-      setCurrentQuestion(q.text);
-      setCurrentQuestionId(q.id);
+      const qText = getQuestionText(q);
+      const qId = getQuestionId(q, currentQuestionIndex);
+      setCurrentQuestion(qText);
+      setCurrentQuestionId(qId);
       setTextAnswer('');
       setFeedback(null);
       setScore(null);
@@ -51,8 +103,16 @@ const PracticeQuestion = () => {
       setAnalysis(null);
       setLiveFeedback(null);
       setHint(null);
+
+      try {
+        if (videoRecorder?.clearBlobUrl) videoRecorder.clearBlobUrl();
+        if (audioRecorder?.clearBlobUrl) audioRecorder.clearBlobUrl();
+      } catch (e) {
+        // Safe ignore
+      }
     }
   }, [currentQuestionIndex, questions]);
+
 
   const getLiveFeedback = async () => {
     if (!textAnswer || textAnswer.trim().length < 20 || isLiveFeedbackLoading) return;
@@ -151,12 +211,20 @@ const PracticeQuestion = () => {
   };
 
   const handleNextQuestion = () => {
+    try {
+      if (videoRecorder?.clearBlobUrl) videoRecorder.clearBlobUrl();
+      if (audioRecorder?.clearBlobUrl) audioRecorder.clearBlobUrl();
+    } catch (e) {
+      // Safe ignore
+    }
+
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setCurrentQuestionIndex(prev => prev + 1);
     } else {
       navigate('/dashboard');
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-purple-900 to-gray-900 text-white flex items-center justify-center p-4">

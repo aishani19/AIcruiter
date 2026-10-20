@@ -21,8 +21,9 @@ const PeerMatch = () => {
   };
 
   useEffect(() => {
-    // Determine socket URL - use window.location if on the same host
-    const socketUrl = "https://ai-cruiter-weld.vercel.app";
+    const socketUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://127.0.0.1:5000'
+      : "https://ai-cruiter-weld.vercel.app";
     const newSocket = io(socketUrl);
     setSocket(newSocket);
 

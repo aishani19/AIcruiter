@@ -81,7 +81,10 @@ if sys.platform == 'win32':
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 # ✅ Core AI & Media Imports
-from groq_api import extract_text_from_pdf
+try:
+    from pdf_utils import extract_text_from_pdf
+except ImportError:
+    from groq_api import extract_text_from_pdf
 from resume_rag import (
     generate_questions_from_resume,
     generate_feedback as generate_rag_feedback,
@@ -122,11 +125,14 @@ try:
     engine = create_engine(DATABASE_URL, pool_pre_ping=True, echo=False)
     with engine.connect() as conn:
         conn.execute(sqlalchemy.text("SELECT 1"))
-    logger.info("✓ Connected to PostgreSQL")
-except:
+    db_type = "PostgreSQL" if "postgres" in DATABASE_URL.lower() else "SQLite"
+    logger.info(f"✓ Connected to database: {db_type}")
+except Exception as db_err:
+    logger.warning(f"Failed to connect to primary DB ({db_err}), falling back to SQLite")
     DATABASE_URL = "sqlite:///./alcruiter.db"
     engine = create_engine(DATABASE_URL, echo=False)
     logger.info("✓ Using SQLite database")
+
 
 Session = scoped_session(sessionmaker(bind=engine))
 
@@ -359,13 +365,24 @@ def generate_questions_api(current_user):
                 # Fallback handled in resume_rag, but if it still returns empty...
 
             formatted_questions = []
-            for i, q_item in enumerate(generated_list):
-                q_text = q_item.get("text") if isinstance(q_item, dict) else str(q_item)
+            seen_texts = set()
+            order_idx = 0
+            for q_item in generated_list:
+                if isinstance(q_item, dict):
+                    q_text = (q_item.get("text") or q_item.get("question") or q_item.get("q") or "").strip()
+                else:
+                    q_text = str(q_item).strip()
+                if not q_text:
+                    continue
+                q_lower = q_text.lower()
+                if q_lower in seen_texts:
+                    continue
+                seen_texts.add(q_lower)
                 q_model = Question(
                     session_id=interview_session.session_id,
                     question_text=q_text,
-                    order=i,
-                    difficulty="medium"
+                    order=order_idx,
+                    difficulty=q_item.get("difficulty", "medium") if isinstance(q_item, dict) else "medium"
                 )
                 db_session.add(q_model)
                 db_session.flush()
@@ -373,6 +390,7 @@ def generate_questions_api(current_user):
                     "id": q_model.question_id,
                     "text": q_text
                 })
+                order_idx += 1
 
             db_session.commit()
             return jsonify({
@@ -544,8 +562,8 @@ def submit_answer(current_user):
                     ai_feedback = f"File upload error: {str(file_err)}"
                     score = 55
 
-            # ✍️ Fallback to RAG text evaluation if no AI feedback yet or insufficient metrics
-            if not ai_feedback or score < 50:
+            # ✍️ Fallback to RAG text evaluation if no AI feedback yet, error occurred, or insufficient metrics
+            if not ai_feedback or score < 50 or "error:" in str(ai_feedback).lower():
                 try:
                     logger.info("Attempting RAG-based text evaluation...")
                     user = db_session.query(User).filter_by(user_id=current_user.user_id).first()

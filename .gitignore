@@ -29,6 +29,7 @@ backend/uploads/
 *.log
 debug-*.log
 .cursor/
+scratch/
 
 # Local run logs
 backend/backend_log.txt

@@ -3,6 +3,9 @@ flask-cors
 requests
 python-dotenv
 PyPDF2
+pypdf
+pymupdf
+pdfplumber
 pydub
 textblob
 opencv-python-headless

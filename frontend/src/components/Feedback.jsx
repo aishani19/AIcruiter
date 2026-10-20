@@ -43,7 +43,9 @@ const Feedback = () => {
         <div className="flex flex-col space-y-8 md:w-1/4">
           <div className="bg-gray-800 p-6 rounded-2xl border-l-4 border-blue-500 shadow-lg">
             <h2 className="text-2xl font-bold text-blue-300 mb-2">Tone</h2>
-            <p className="text-xl text-gray-200">{feedback.sentiment}</p>
+            <p className="text-xl text-gray-200">
+              {typeof feedback.sentiment === 'object' ? (feedback.sentiment?.category || JSON.stringify(feedback.sentiment)) : String(feedback.sentiment || 'Professional')}
+            </p>
           </div>
           <div className="bg-gray-800 p-6 rounded-2xl border-l-4 border-purple-500 shadow-lg">
             <h2 className="text-2xl font-bold text-purple-300 mb-2">Audio Duration</h2>

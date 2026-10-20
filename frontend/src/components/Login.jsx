@@ -39,7 +39,7 @@ const Login = () => {
       }
     } catch (err) {
       console.error("❌ ERROR:", err);
-      const rawError = err.response?.data?.error || err.response?.data || err.message || "Failed to generate questions.";
+      const rawError = err.response?.data?.error || err.response?.data || err.message || "Authentication failed. Please check your credentials.";
       setError(typeof rawError === "string" ? rawError : (rawError.message || JSON.stringify(rawError)));
     } finally {
       setIsLoading(false);

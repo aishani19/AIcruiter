@@ -1,8 +1,11 @@
 import os
 from dotenv import load_dotenv
-import PyPDF2
 import re
 import google.generativeai as genai
+try:
+    from pdf_utils import extract_text_from_pdf
+except ImportError:
+    pass
 
 # =========================
 # 🔧 SETUP
@@ -37,24 +40,6 @@ def _get_model():
         pass
     raise RuntimeError("No compatible Gemini model found for generateContent.")
 
-# =========================
-# 📄 PDF TEXT EXTRACTION
-# =========================
-def extract_text_from_pdf(pdf_path):
-    resume_text = ""
-    try:
-        with open(pdf_path, 'rb') as file:
-            reader = PyPDF2.PdfReader(file)
-            for page in reader.pages:
-                text = page.extract_text()
-                if text:
-                    resume_text += text + "\n"
-    except Exception as e:
-        print("❌ PDF Error:", e)
-
-    if not resume_text.strip():
-        return "Resume content unavailable (Could not parse PDF)."
-    return resume_text.strip()
 
 
 # =========================
@@ -142,7 +127,7 @@ def generate_questions(resume_text, position, num_questions, seniority_level="fr
     
     try:
         model = _get_model()
-        response = model.generate_content(prompt, timeout=15)
+        response = model.generate_content(prompt)
         
         if response and response.text:
             raw_lines = response.text.strip().split('\n')
@@ -204,7 +189,7 @@ def generate_feedback(question, answer):
 
     try:
         model = _get_model()
-        response = model.generate_content(prompt, timeout=15)
+        response = model.generate_content(prompt)
         if response and response.text:
             return response.text.strip()
         return "Feedback unavailable at the moment."
@@ -232,7 +217,7 @@ def generate_hint(question, resume_text):
     """
     try:
         model = _get_model()
-        response = model.generate_content(prompt, timeout=10)
+        response = model.generate_content(prompt)
         return response.text.strip() if response else "Connect your answer to a specific project from your resume."
     except Exception:
         return "Connect your answer to a specific project from your resume."
